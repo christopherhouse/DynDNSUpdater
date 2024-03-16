@@ -1,3 +1,4 @@
+using DynDNSUpdater.Services;
 using Microsoft.Extensions.Options;
 
 namespace DynDNSUpdater;
@@ -6,12 +7,16 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IOptions<DynDnsUpdaterOptions> _options;
+    private readonly IDnsUpdaterClient _dnsUpdaterClient;
     private readonly int delayIntervalInMilliseconds;
 
-    public Worker(IOptions<DynDnsUpdaterOptions> options, ILogger<Worker> logger)
+    public Worker(IOptions<DynDnsUpdaterOptions> options,
+        IDnsUpdaterClient dnsUpdaterClient,
+        ILogger<Worker> logger)
     {
         _logger = logger;
         _options = options;
+        _dnsUpdaterClient = dnsUpdaterClient;
         delayIntervalInMilliseconds = options.Value.IntervalToCheckInMinutes * 60 * 1000;
     }
 
@@ -25,6 +30,8 @@ public class Worker : BackgroundService
             if (_logger.IsEnabled(LogLevel.Information))
             {
                 Console.WriteLine($"** {_options.Value.HostNameToUpdate}");
+
+                var result = await _dnsUpdaterClient.UpdateDnsAsync(_options.Value.HostNameToUpdate);
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
             }
             await Task.Delay(delayIntervalInMilliseconds, stoppingToken);

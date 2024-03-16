@@ -1,3 +1,5 @@
+using DynDNSUpdater.Services;
+
 namespace DynDNSUpdater;
 
 public class Program
@@ -10,11 +12,8 @@ public class Program
             .Bind(builder.Configuration);
 
         builder.Services.AddHostedService<Worker>();
-
-        foreach (var c in builder.Configuration.AsEnumerable())
-        {
-            Console.WriteLine($"** {c.Key}: {c.Value}");
-        }
+        builder.Services.AddTransient<IDnsClient, DnsClient>();
+        builder.Services.AddTransient<IDnsUpdaterClient, DnsUpdaterClient>();
 
         var host = builder.Build();
         host.Run();
