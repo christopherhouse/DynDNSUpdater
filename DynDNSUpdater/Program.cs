@@ -14,6 +14,7 @@ public class Program
         builder.Services.AddHostedService<Worker>();
         builder.Services.AddTransient<IDnsClient, DnsClient>();
         builder.Services.AddTransient<IDnsUpdaterClient, DnsUpdaterClient>();
+        builder.Services.AddHttpClient<IDnsUpdateHttpClient, DnsUpdateHttpClient>();
 
         var host = builder.Build();
         host.Run();
