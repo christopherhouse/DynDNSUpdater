@@ -8,14 +8,14 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["DynDNSUpdater.csproj", "DynDNSUpdater/"]
-RUN dotnet restore "./DynDNSUpdater.csproj"
+RUN dotnet restore "./DynDNSUpdater/DynDNSUpdater.csproj"
 COPY . .
 WORKDIR "/src/DynDNSUpdater"
-RUN dotnet build "./DynDNSUpdater.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./DynDNSUpdater/DynDNSUpdater.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./DynDNSUpdater.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./DynDNSUpdater/DynDNSUpdater.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
