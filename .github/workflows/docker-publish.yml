@@ -70,6 +70,11 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+      # Run a bash script to copy Dockerfile from .\DynDNSUpdater to the parent directory
+      - name: Copy Dockerfile
+        run: |
+          cp DynDNSUpdater/Dockerfile Dockerfile          
+
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
