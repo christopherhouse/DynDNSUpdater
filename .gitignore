@@ -5,8 +5,6 @@
 
 launchSettings.json
 
-*.cs
-
 # dotenv files
 .env
 
