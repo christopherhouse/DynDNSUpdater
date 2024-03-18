@@ -10,7 +10,7 @@ WORKDIR /src
 COPY ["DynDNSUpdater/DynDNSUpdater.csproj", "DynDNSUpdater/"]
 RUN dotnet restore "./DynDNSUpdater/./DynDNSUpdater.csproj"
 COPY . .
-#WORKDIR "/src/DynDNSUpdater"
+WORKDIR "/src/DynDNSUpdater"
 RUN dotnet build "./DynDNSUpdater.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
