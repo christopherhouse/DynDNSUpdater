@@ -28,28 +28,34 @@ public class DnsUpdaterClient : IDnsUpdaterClient
         var currentDnsIp = await _dnsClient.GetIpForHostNameAsync(hostName);
         var actualCurrentIp = await _dnsUpdateHttpClient.GetCurrentIpAddressAsync();
 
-        if (currentDnsIp == actualCurrentIp)
+        try
         {
-            _logger.LogInformation($"No update needed, current IP in DNS is: {currentDnsIp}");
-            result = DynDnsStatsUpdateResult.NoUpdateNeeded;
-        }
-        else
-        {
-            var updateResult= await _dnsUpdateHttpClient.UpdateDynDns(hostName, actualCurrentIp);
-
-            if (updateResult)
+            if (currentDnsIp == actualCurrentIp)
             {
-                _logger.LogInformation($"Update succeeded, new IP in DNS is: {actualCurrentIp}");
-                result = DynDnsStatsUpdateResult.UpdateSucceeded;
+                _logger.LogInformation($"No update needed, current IP in DNS is: {currentDnsIp}");
+                result = DynDnsStatsUpdateResult.NoUpdateNeeded;
             }
             else
             {
-                _logger.LogError($"Update failed, current IP in DNS is: {currentDnsIp}");
-                result = DynDnsStatsUpdateResult.UpdateFailed;
+                var updateResult = await _dnsUpdateHttpClient.UpdateDynDns(hostName, actualCurrentIp);
+
+                if (updateResult)
+                {
+                    _logger.LogInformation($"Update succeeded, new IP in DNS is: {actualCurrentIp}");
+                    result = DynDnsStatsUpdateResult.UpdateSucceeded;
+                }
+                else
+                {
+                    _logger.LogError($"Update failed, current IP in DNS is: {currentDnsIp}");
+                    result = DynDnsStatsUpdateResult.UpdateFailed;
+                }
             }
         }
-
-        _logger.LogInformation($"Current IP in DNS is: {currentDnsIp}");
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error updating DNS");
+            result = DynDnsStatsUpdateResult.UpdateFailed;
+        }
 
         return result;
     }
