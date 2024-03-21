@@ -52,10 +52,3 @@ public class DnsUpdateHttpClient : IDnsUpdateHttpClient
         return new Uri(uriString);
     }
 }
-
-public interface IDnsUpdateHttpClient
-{
-    Task<string> GetCurrentIpAddressAsync();
-
-    Task<bool> UpdateDynDns(string hostName, string ipAddress);
-}
