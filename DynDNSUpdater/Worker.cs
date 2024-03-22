@@ -9,7 +9,7 @@ public class Worker : BackgroundService
     private readonly DynDnsUpdaterOptions _options;
     private readonly IDnsUpdaterClient _dnsUpdaterClient;
     private bool _isFirstRun = true;
-    private string _hostNameToUpdate;
+    private readonly string _hostNameToUpdate;
 
     public Worker(IOptions<DynDnsUpdaterOptions> options,
         IDnsUpdaterClient dnsUpdaterClient,
