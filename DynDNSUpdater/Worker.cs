@@ -6,24 +6,30 @@ namespace DynDNSUpdater;
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
-    private readonly IOptions<DynDnsUpdaterOptions> _options;
+    private readonly DynDnsUpdaterOptions _options;
     private readonly IDnsUpdaterClient _dnsUpdaterClient;
-    private readonly int _delayIntervalInMilliseconds;
     private bool _isFirstRun = true;
+    private readonly string _hostNameToUpdate;
 
     public Worker(IOptions<DynDnsUpdaterOptions> options,
         IDnsUpdaterClient dnsUpdaterClient,
         ILogger<Worker> logger)
     {
         _logger = logger;
-        _options = options;
+        _options = options.Value;
         _dnsUpdaterClient = dnsUpdaterClient;
-        _delayIntervalInMilliseconds = options.Value.IntervalToCheckInMinutes * 60 * 1000;
+
+        if (string.IsNullOrWhiteSpace(_options.HostNameToUpdate))
+        {
+            throw new ArgumentException("HostNameToUpdate must be set");
+        }
+
+        _hostNameToUpdate = _options.HostNameToUpdate;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation($"Initializing worker, polling interval is {_options.Value.IntervalToCheckInMinutes} minutes/{_delayIntervalInMilliseconds} ms");
+        _logger.LogInformation($"Initializing worker, polling interval is {_options.IntervalToCheckInMinutes} minutes/{_options.IntervalToCheckInMinutesAsMilliseconds} ms");
 
 
         while (!stoppingToken.IsCancellationRequested)
@@ -33,7 +39,7 @@ public class Worker : BackgroundService
                 var initialLogMessage = _isFirstRun ? "Initial run - updating DNS" : "Delay interval elapsed - updating DNS";
                 _logger.LogInformation(initialLogMessage);
 
-                var result = await _dnsUpdaterClient.UpdateDnsAsync(_options.Value.HostNameToUpdate);
+                var result = await _dnsUpdaterClient.UpdateDnsAsync(_hostNameToUpdate);
                 _isFirstRun = false;
 
                 switch (result)
@@ -59,7 +65,7 @@ public class Worker : BackgroundService
                 _logger.LogError(e, "Error updating DNS");
             }
 
-            await Task.Delay(_delayIntervalInMilliseconds, stoppingToken);
+            await Task.Delay(_options.IntervalToCheckInMinutesAsMilliseconds, stoppingToken);
         }
     }
 }

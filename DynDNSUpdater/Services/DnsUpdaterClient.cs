@@ -4,7 +4,6 @@ namespace DynDNSUpdater.Services;
 
 public class DnsUpdaterClient : IDnsUpdaterClient
 {
-    private readonly IOptions<DynDnsUpdaterOptions> _options;
     private readonly IDnsClient _dnsClient;
     private readonly IDnsUpdateHttpClient _dnsUpdateHttpClient;
     private readonly ILogger<DnsUpdaterClient> _logger;
@@ -15,7 +14,6 @@ public class DnsUpdaterClient : IDnsUpdaterClient
         IDnsUpdateHttpClient dnsUpdateHttpClient,
         ILogger<DnsUpdaterClient> logger)
     {
-        _options = options;
         _dnsClient = dnsClient;
         _dnsUpdateHttpClient = dnsUpdateHttpClient;
         _logger = logger;
