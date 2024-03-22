@@ -9,6 +9,7 @@ public class Worker : BackgroundService
     private readonly DynDnsUpdaterOptions _options;
     private readonly IDnsUpdaterClient _dnsUpdaterClient;
     private bool _isFirstRun = true;
+    private string _hostNameToUpdate;
 
     public Worker(IOptions<DynDnsUpdaterOptions> options,
         IDnsUpdaterClient dnsUpdaterClient,
@@ -17,6 +18,13 @@ public class Worker : BackgroundService
         _logger = logger;
         _options = options.Value;
         _dnsUpdaterClient = dnsUpdaterClient;
+
+        if (string.IsNullOrWhiteSpace(_options.HostNameToUpdate))
+        {
+            throw new ArgumentException("HostNameToUpdate must be set");
+        }
+
+        _hostNameToUpdate = _options.HostNameToUpdate;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -31,7 +39,7 @@ public class Worker : BackgroundService
                 var initialLogMessage = _isFirstRun ? "Initial run - updating DNS" : "Delay interval elapsed - updating DNS";
                 _logger.LogInformation(initialLogMessage);
 
-                var result = await _dnsUpdaterClient.UpdateDnsAsync(_options.HostNameToUpdate);
+                var result = await _dnsUpdaterClient.UpdateDnsAsync(_hostNameToUpdate);
                 _isFirstRun = false;
 
                 switch (result)
