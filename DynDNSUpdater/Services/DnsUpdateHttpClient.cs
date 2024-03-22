@@ -7,14 +7,22 @@ namespace DynDNSUpdater.Services;
 public class DnsUpdateHttpClient : IDnsUpdateHttpClient
 {
     private readonly HttpClient _httpClient;
-    private readonly IOptions<DynDnsUpdaterOptions> _options;
+    private readonly DynDnsUpdaterOptions _options;
     private readonly Uri _checkCurrentIpUri;
+    private string _dynDnsUpdateRequestUriFormat;
 
     public DnsUpdateHttpClient(HttpClient _httpClient, IOptions<DynDnsUpdaterOptions> options)
     {
         this._httpClient = _httpClient;
-        _options = options;
-        _checkCurrentIpUri = new Uri($"http://{_options.Value.IpCheckHostName}");
+        _options = options.Value;
+        _checkCurrentIpUri = new Uri($"http://{_options.IpCheckHostName}"); // Host only supports HTTP
+
+        if (string.IsNullOrWhiteSpace(_options.DynDnsUpdateRequestUriFormat))
+        {
+            throw new ArgumentException("DynDnsUpdateRequestUriFormat must be set");
+        }
+
+        _dynDnsUpdateRequestUriFormat = _options.DynDnsUpdateRequestUriFormat;
     }
 
     public async Task<string> GetCurrentIpAddressAsync()
@@ -46,8 +54,8 @@ public class DnsUpdateHttpClient : IDnsUpdateHttpClient
 
     private Uri FormatUpdateUri(string hostName, string ipAddress)
     {
-        var authToken = $"{_options.Value.DynDnsUsername}:{_options.Value.DynDnsPassword}";
-        var uriString = string.Format(_options.Value.DynDnsUpdateRequestUriFormat, authToken, hostName, ipAddress);
+        var authToken = $"{_options.DynDnsUsername}:{_options.DynDnsPassword}";
+        var uriString = string.Format(_dynDnsUpdateRequestUriFormat, authToken, hostName, ipAddress);
 
         return new Uri(uriString);
     }
