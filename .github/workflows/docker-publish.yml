@@ -100,7 +100,7 @@ jobs:
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.18.0
         with:
           image-ref: 'ghcr.io/christopherhouse/dyndnsupdater:feature-container-scanning'
           format: 'table'
